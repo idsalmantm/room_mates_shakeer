@@ -27,7 +27,27 @@
     <section class="card"><div class="section-title"><div><span class="step">01</span><h2>Monthly bill</h2></div><button type="button" id="example" class="text-button">Try an example</button></div>
       <div class="grid three"><label>Villa / report name<input id="villa" maxlength="100" placeholder="Our shared villa"></label><label>Period starts<input id="start" type="date" required></label><label>Period ends<input id="end" type="date" required></label></div>
       <div class="divider"></div>
-      <div class="grid three"><label>Electricity consumption <span>kWh</span><input id="mainUsage" type="number" min="0" step="0.001" placeholder="1,000" required></label><label>Electricity charges <span>AED</span><input id="electricity" type="number" min="0" step="0.01" placeholder="2,000.00" required></label><label>Water charges <span>AED</span><input id="water" type="number" min="0" step="0.01" placeholder="500.00" required></label><label>Gas charges <span>AED · optional</span><input id="gas" type="number" min="0" step="0.01" placeholder="0.00"></label><label>Sewage tanker <span>AED · optional</span><input id="tanker" type="number" min="0" step="0.01" placeholder="0.00"></label><label>Split gas by<span>Household rule</span><select id="gasRule"><option value="people">By people</option><option value="equal">Equal per family</option></select></label></div>
+      <div class="grid three">
+        <label>Electricity consumption <span>kWh</span><input id="mainUsage" type="number" min="0" step="0.001" placeholder="1,000" required></label>
+        <label>Electricity charges <span>AED</span><input id="electricity" type="number" min="0" step="0.01" placeholder="2,000.00" required></label>
+        <label>Water charges <span>AED</span><input id="water" type="number" min="0" step="0.01" placeholder="500.00" required></label>
+        <label>Gas charges <span>AED · optional</span><input id="gas" type="number" min="0" step="0.01" placeholder="0.00"></label>
+        <label>Sewage tanker <span>AED · optional</span><input id="tanker" type="number" min="0" step="0.01" placeholder="0.00"></label>
+        <div class="field field-gas-rule">
+          <span class="field-label">Split gas by <span>Household rule</span></span>
+          <div class="dropdown" id="gasRuleDropdown">
+            <input type="hidden" id="gasRule" value="people">
+            <button type="button" class="dropdown-btn" id="gasRuleBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="gasRuleMenu">
+              <span class="dropdown-text" id="gasRuleText">By people</span>
+              <svg class="dropdown-caret" width="12" height="8" viewBox="0 0 12 8" aria-hidden="true" focusable="false"><path d="M1.5 2.2L6 6.7L10.5 2.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <ul class="dropdown-menu" id="gasRuleMenu" role="listbox" hidden>
+              <li role="option" tabindex="-1" data-value="people" aria-selected="true">By people</li>
+              <li role="option" tabindex="-1" data-value="equal" aria-selected="false">Equal per family</li>
+            </ul>
+          </div>
+        </div>
+      </div>
       <p class="hint">Use the same billing period for all charges.</p>
     </section>
     <section class="card"><div class="section-title"><div><span class="step">02</span><h2>Families & AC meters</h2></div><span class="muted">On phone</span></div><p class="hint">Names & meters stay saved. After you calculate, tap <b>Start next month</b> — last current readings fill in as previous automatically.</p><div id="families"></div><button type="button" id="add-family" class="secondary">+ Add family</button></section>

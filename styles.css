@@ -61,18 +61,32 @@ input,select{
   background:#fbfcfa;color:var(--ink);min-height:var(--tap);
 }
 input:focus,select:focus{outline:2px solid #70b4a3;outline-offset:1px}
-/* Custom select chevron — leaves room so native/browser arrows don’t collide */
-select{
-  -webkit-appearance:none;
-  appearance:none;
-  padding-right:36px;
-  background-color:#fbfcfa;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1.5 2.2L6 6.7L10.5 2.2' stroke='%23467568' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:right 12px center;
-  background-size:12px 8px;
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field-label{font-size:11px;font-weight:650;color:#385149;display:flex;flex-direction:column;gap:2px}
+.field-label>span{color:var(--muted);font-size:10px;font-weight:400}
+.field-gas-rule{grid-column:span 1}
+.dropdown{position:relative;width:100%;min-width:0}
+.dropdown-btn{
+  width:100%;min-height:var(--tap);display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border:1px solid #d9e1d9;border-radius:8px;padding:10px 12px;background:#fbfcfa;color:var(--ink);
+  font:inherit;font-size:14px;font-weight:500;text-align:left;cursor:pointer;
 }
-select::-ms-expand{display:none}
+.dropdown-btn:focus-visible{outline:2px solid #70b4a3;outline-offset:1px}
+.dropdown.open .dropdown-btn{border-color:#70b4a3;background:#fff}
+.dropdown-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dropdown-caret{flex-shrink:0;width:12px;height:8px;color:#467568;display:block}
+.dropdown.open .dropdown-caret{transform:rotate(180deg)}
+.dropdown-menu{
+  position:absolute;z-index:40;left:0;right:0;top:calc(100% + 4px);margin:0;padding:6px;
+  list-style:none;background:#fff;border:1px solid var(--line);border-radius:10px;
+  box-shadow:0 8px 24px #163d2922;
+}
+.dropdown-menu[hidden]{display:none!important}
+.dropdown-menu li{
+  padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:var(--ink);
+}
+.dropdown-menu li:hover,.dropdown-menu li:focus{background:#edf3ec;outline:none}
+.dropdown-menu li[aria-selected="true"]{background:#e4efe6;color:#146c60;font-weight:650}
 /* Date fields: room for calendar icon on WebKit/mobile */
 input[type="date"]{
   -webkit-appearance:none;
@@ -150,7 +164,7 @@ footer{font-size:10px;text-align:center;color:#8a948c;padding:24px 0 8px;line-he
 
 @media(max-width:720px){
   .three{grid-template-columns:1fr 1fr}
-  .three>label:first-child{grid-column:1/-1}
+  .three>label:first-child,.field-gas-rule{grid-column:1/-1}
 }
 
 @media(max-width:520px){
@@ -175,8 +189,8 @@ footer{font-size:10px;text-align:center;color:#8a948c;padding:24px 0 8px;line-he
   .divider{margin:10px 0}
   label{font-size:10px;gap:3px}
   label span{font-size:9px}
-  input,select{font-size:16px;padding:9px 10px;min-height:40px} /* 16px avoids iOS zoom */
-  select{padding-right:34px;background-position:right 10px center;background-size:11px 7px}
+  input,select,.dropdown-btn{font-size:16px;padding:9px 12px;min-height:40px}
+  .dropdown-menu li{font-size:16px;padding:12px}
   .family{padding:10px;margin:8px 0}
   .family-info{grid-template-columns:1fr}
   .meter{

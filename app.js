@@ -177,8 +177,49 @@ function renderHistory() {
     </article>`;
   }).join('');
 }
+const gasRuleLabels = { people: 'By people', equal: 'Equal per family' };
+function setGasRuleUI(value) {
+  const rule = value === 'equal' ? 'equal' : 'people';
+  $('gasRule').value = rule;
+  $('gasRuleText').textContent = gasRuleLabels[rule];
+  $('gasRuleMenu').querySelectorAll('[role="option"]').forEach(opt => {
+    opt.setAttribute('aria-selected', opt.dataset.value === rule ? 'true' : 'false');
+  });
+}
+function closeGasRuleMenu() {
+  const drop = $('gasRuleDropdown');
+  drop.classList.remove('open');
+  $('gasRuleBtn').setAttribute('aria-expanded', 'false');
+  $('gasRuleMenu').hidden = true;
+}
+function openGasRuleMenu() {
+  const drop = $('gasRuleDropdown');
+  drop.classList.add('open');
+  $('gasRuleBtn').setAttribute('aria-expanded', 'true');
+  $('gasRuleMenu').hidden = false;
+}
+$('gasRuleBtn').addEventListener('click', e => {
+  e.preventDefault();
+  if ($('gasRuleDropdown').classList.contains('open')) closeGasRuleMenu();
+  else openGasRuleMenu();
+});
+$('gasRuleMenu').addEventListener('click', e => {
+  const opt = e.target.closest('[role="option"]');
+  if (!opt) return;
+  state.gasRule = opt.dataset.value === 'equal' ? 'equal' : 'people';
+  setGasRuleUI(state.gasRule);
+  closeGasRuleMenu();
+  saveDraft();
+});
+document.addEventListener('click', e => {
+  if (!$('gasRuleDropdown').contains(e.target)) closeGasRuleMenu();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeGasRuleMenu();
+});
 function render() {
-  fields.forEach(k => { $(k).value = state[k]; });
+  fields.forEach(k => { if (k !== 'gasRule') $(k).value = state[k]; });
+  setGasRuleUI(state.gasRule);
   $('families').innerHTML = state.families.map((f, i) => `<article class="family" data-family="${i}"><div class="family-head"><h3>Family ${String(i + 1).padStart(2, '0')}</h3><button type="button" class="text-button danger" data-action="remove-family">Remove family</button></div><div class="grid family-info"><label>Family / room name<input data-field="name" maxlength="80" value="${esc(f.name)}" placeholder="e.g. Shakeer"></label><label>People, including kids<input data-field="people" type="number" min="1" step="1" value="${esc(f.people)}" placeholder="4"></label></div><div class="meters">${f.meters.map((m, j) => `<div class="meter" data-meter="${j}"><label>Meter name<input data-field="name" maxlength="80" value="${esc(m.name)}" placeholder="AC ${j + 1}"></label><label>Previous (kWh)<input data-field="previous" type="number" min="0" step="0.001" value="${esc(m.previous)}" placeholder="0"></label><label>Current (kWh)<input data-field="current" type="number" min="0" step="0.001" value="${esc(m.current)}" placeholder="0"></label><button type="button" class="remove-meter" data-action="remove-meter" aria-label="Remove meter ${j + 1} from family ${i + 1}">×</button></div>`).join('')}</div>${!f.meters.length ? '<p class="hint">No AC meters. This family shares common electricity only.</p>' : ''}<button type="button" class="text-button" data-action="add-meter">+ Add AC meter</button></article>`).join('');
   $('household-status').textContent = householdSummary(household || serializeHousehold(state));
   renderHistory();
