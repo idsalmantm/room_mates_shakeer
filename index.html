@@ -3,15 +3,16 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#146c60">
-  <title>Roommates · Villa bill splitter</title>
+  <title>Villa/Room Mates · FindHub IT Solutions</title>
   <link rel="stylesheet" href="styles.css">
   <script src="calculator.js" defer></script><script src="app.js" defer></script>
 </head>
 <body>
 <main>
-  <header><a class="brand" href="./"><span class="logo">⌂</span> roommates <small>SHAKEER</small></a><span class="badge">AED · UAE</span></header>
+  <header><a class="brand" href="./"><span class="logo">⌂</span> Villa/Room Mates <small>FindHub IT Solutions</small></a><span class="badge">AED · UAE</span></header>
   <section class="intro"><span class="eyebrow">SHARED HOME. CLEAR BILLS.</span><h1>A fair split,<br>down to the last fils.</h1><p>One villa, multiple families. Turn your monthly utility bill into a simple breakdown everyone can understand.</p></section>
-  <div class="session"><span>◉ <strong>Saved on this phone as you type.</strong> Safe to close the browser and come back later.</span><span id="save-status" role="status">Stored only on this device</span></div>
+  <div class="session"><span>◉ <strong>Families stay on this phone.</strong> Bill draft saves as you type — safe to close and return later.</span><span id="save-status" role="status">Stored only on this device</span></div>
+  <div class="household-banner"><span id="household-status">No saved household yet</span><div class="household-actions"><button type="button" id="new-month" class="secondary">Start new month</button><button type="button" id="clear-household" class="text-button danger">Forget families</button></div></div>
   <form id="bill-form" novalidate>
     <section class="card"><div class="section-title"><div><span class="step">01</span><h2>Monthly bill</h2></div><button type="button" id="example" class="text-button">Try an example</button></div>
       <div class="grid three"><label>Villa / report name<input id="villa" maxlength="100" placeholder="Our shared villa"></label><label>Period starts<input id="start" type="date" required></label><label>Period ends<input id="end" type="date" required></label></div>
@@ -19,7 +20,7 @@
       <div class="grid three"><label>Electricity consumption <span>kWh · from the main bill</span><input id="mainUsage" type="number" min="0" step="0.001" placeholder="1,000" required></label><label>Electricity charges <span>AED · total amount to split</span><input id="electricity" type="number" min="0" step="0.01" placeholder="2,000.00" required></label><label>Water charges <span>AED</span><input id="water" type="number" min="0" step="0.01" placeholder="500.00" required></label><label>Gas charges <span>AED · optional</span><input id="gas" type="number" min="0" step="0.01" placeholder="0.00"></label><label>Sewage tanker <span>AED · leave empty if none</span><input id="tanker" type="number" min="0" step="0.01" placeholder="0.00"></label><label>Split gas by <span>Choose your household agreement</span><select id="gasRule"><option value="people">Number of people</option><option value="equal">Equally per family</option></select></label></div>
       <p class="hint">Use charges covering the same billing period. Include any fees you want to share in the relevant category.</p>
     </section>
-    <section class="card"><div class="section-title"><div><span class="step">02</span><h2>Families & AC meters</h2></div><span class="muted">Kids count too</span></div><p class="hint">Enter cumulative meter readings at the start and end of this bill period. Add a separate meter for every AC.</p><div id="families"></div><button type="button" id="add-family" class="secondary">+ Add family</button></section>
+    <section class="card"><div class="section-title"><div><span class="step">02</span><h2>Families & AC meters</h2></div><span class="muted">Kept on this phone</span></div><p class="hint">Family names, people counts, and meter names are remembered for whoever uses this browser. Enter cumulative readings for the bill period. Use <b>Start new month</b> to clear charges and roll last readings into “previous”.</p><div id="families"></div><button type="button" id="add-family" class="secondary">+ Add family</button></section>
     <aside class="rules"><strong>How we split it</strong><p>AC electricity follows each family’s actual usage. Remaining electricity is shared equally between families. Water and tanker charges are split by people, including children. Gas uses your selected rule.</p></aside>
     <div id="errors" class="errors" role="alert" hidden></div>
     <div class="actions"><button type="submit" class="primary">Calculate shared bill <span>↗</span></button><button type="button" id="reset" class="text-button">Clear draft</button></div>
@@ -37,6 +38,6 @@
       <button type="button" id="clear-all-data" class="text-button danger">Delete all local data</button>
     </div>
   </section>
-  <footer>No account. No server. Your numbers stay on this phone’s browser only.<br>Use Clear draft, Delete, or Delete all local data to erase saved bills.</footer>
+  <footer>No account. No server. Family details and bills stay on this phone’s browser only.<br>Use Start new month, Forget families, Delete, or Delete all local data to erase what you no longer need.</footer>
 </main>
 </body></html>

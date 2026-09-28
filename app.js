@@ -2,15 +2,19 @@
 const $ = id => document.getElementById(id);
 const draftKey = 'roommates-shakeer-draft-v1';
 const historyKey = 'roommates-shakeer-history-v1';
+const householdKey = 'roommates-shakeer-household-v1';
 const fields = ['villa', 'start', 'end', 'mainUsage', 'electricity', 'water', 'gas', 'tanker', 'gasRule'];
 const freshFamily = () => ({ name: '', people: '', meters: [{ name: 'AC 1', previous: '', current: '' }] });
-const blank = () => ({ villa: '', start: '', end: '', mainUsage: '', electricity: '', water: '', gas: '', tanker: '', gasRule: 'people', families: Array.from({ length: 3 }, freshFamily) });
+const blankBill = () => ({ villa: '', start: '', end: '', mainUsage: '', electricity: '', water: '', gas: '', tanker: '', gasRule: 'people' });
+const blank = () => ({ ...blankBill(), families: Array.from({ length: 3 }, freshFamily) });
 const esc = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const money = cents => (cents / 100).toLocaleString('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const qty = n => Number(n).toLocaleString('en-AE', { maximumFractionDigits: 3 });
 const stamp = () => new Date().toLocaleString('en-AE', { dateStyle: 'medium', timeStyle: 'short' });
 const periodLabel = s => (s.start && s.end) ? `${s.start} → ${s.end}` : 'No period set';
-const validDraft = saved => saved && Array.isArray(saved.families) && saved.families.every(f => typeof f.name === 'string' && Array.isArray(f.meters));
+const validFamilies = families => Array.isArray(families) && families.every(f => f && typeof f.name === 'string' && Array.isArray(f.meters));
+const validDraft = saved => saved && validFamilies(saved.families);
+const validHousehold = saved => saved && validFamilies(saved.families);
 function readJSON(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
@@ -23,14 +27,64 @@ function readJSON(key, fallback) {
 function writeJSON(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
+function serializeHousehold(s) {
+  return {
+    villa: s.villa || '',
+    gasRule: s.gasRule === 'equal' ? 'equal' : 'people',
+    families: s.families.map(f => ({
+      name: f.name || '',
+      people: f.people || '',
+      meters: f.meters.map((m, j) => ({
+        name: m.name || `AC ${j + 1}`,
+        lastReading: String(m.current).trim() !== '' ? m.current : (m.previous || '')
+      }))
+    }))
+  };
+}
+function familiesFromHousehold(household) {
+  if (!validHousehold(household) || !household.families.length) {
+    return Array.from({ length: 3 }, freshFamily);
+  }
+  return household.families.map(f => ({
+    name: f.name || '',
+    people: f.people || '',
+    meters: f.meters.length
+      ? f.meters.map((m, j) => ({
+        name: m.name || `AC ${j + 1}`,
+        previous: m.lastReading || '',
+        current: ''
+      }))
+      : []
+  }));
+}
+function stateFromHousehold(household) {
+  const next = blank();
+  if (!validHousehold(household)) return next;
+  next.villa = household.villa || '';
+  next.gasRule = household.gasRule === 'equal' ? 'equal' : 'people';
+  next.families = familiesFromHousehold(household);
+  return next;
+}
+function householdSummary(household) {
+  if (!validHousehold(household) || !household.families.some(f => f.name.trim() || String(f.people).trim())) {
+    return 'No saved household yet';
+  }
+  const named = household.families.filter(f => f.name.trim()).map(f => f.name.trim());
+  const people = household.families.reduce((n, f) => n + (+f.people || 0), 0);
+  const label = named.length ? named.join(', ') : `${household.families.length} families`;
+  return `${label} · ${people || '—'} people · kept on this phone`;
+}
 const hasDraftData = s => fields.some(k => k !== 'gasRule' && String(s[k] || '').trim()) || s.families.some(f => f.name.trim() || String(f.people).trim() || f.meters.some(m => String(m.previous).trim() || String(m.current).trim() || (m.name && m.name !== 'AC 1')));
 let state = blank();
 let history = [];
+let household = null;
 let storageOk = true;
 try {
   const probe = '__roommates_probe__';
   localStorage.setItem(probe, '1');
   localStorage.removeItem(probe);
+  household = readJSON(householdKey, null);
+  if (!validHousehold(household)) household = null;
   let saved = readJSON(draftKey, null);
   if (!validDraft(saved)) {
     try {
@@ -43,11 +97,27 @@ try {
     } catch (_) {}
   }
   if (validDraft(saved)) state = { ...blank(), ...saved };
+  else if (household) state = stateFromHousehold(household);
+  if (!household && validDraft(state) && state.families.some(f => f.name.trim() || String(f.people).trim())) {
+    household = serializeHousehold(state);
+    writeJSON(householdKey, household);
+  }
   const savedHistory = readJSON(historyKey, []);
   history = Array.isArray(savedHistory) ? savedHistory.filter(item => item && item.id && validDraft(item.state)) : [];
 } catch (_) {
   storageOk = false;
   $('save-status').textContent = 'Local storage unavailable — keep this page open and export your report.';
+}
+function saveHousehold() {
+  if (!storageOk) return;
+  try {
+    household = serializeHousehold(state);
+    writeJSON(householdKey, household);
+    $('household-status').textContent = householdSummary(household);
+  } catch (_) {
+    storageOk = false;
+    $('save-status').textContent = 'Unable to save household — storage may be full.';
+  }
 }
 function saveDraft() {
   if (!storageOk) {
@@ -57,6 +127,7 @@ function saveDraft() {
   }
   try {
     writeJSON(draftKey, state);
+    saveHousehold();
     $('save-status').textContent = `Saved on this phone · ${stamp()}`;
   } catch (_) {
     storageOk = false;
@@ -107,6 +178,7 @@ function renderHistory() {
 function render() {
   fields.forEach(k => { $(k).value = state[k]; });
   $('families').innerHTML = state.families.map((f, i) => `<article class="family" data-family="${i}"><div class="family-head"><h3>Family ${String(i + 1).padStart(2, '0')}</h3><button type="button" class="text-button danger" data-action="remove-family">Remove family</button></div><div class="grid family-info"><label>Family / room name<input data-field="name" maxlength="80" value="${esc(f.name)}" placeholder="e.g. Shakeer"></label><label>People, including kids<input data-field="people" type="number" min="1" step="1" value="${esc(f.people)}" placeholder="4"></label></div><div class="meters">${f.meters.map((m, j) => `<div class="meter" data-meter="${j}"><label>Meter name<input data-field="name" maxlength="80" value="${esc(m.name)}" placeholder="AC ${j + 1}"></label><label>Previous (kWh)<input data-field="previous" type="number" min="0" step="0.001" value="${esc(m.previous)}" placeholder="0"></label><label>Current (kWh)<input data-field="current" type="number" min="0" step="0.001" value="${esc(m.current)}" placeholder="0"></label><button type="button" class="remove-meter" data-action="remove-meter" aria-label="Remove meter ${j + 1} from family ${i + 1}">×</button></div>`).join('')}</div>${!f.meters.length ? '<p class="hint">No AC meters. This family shares common electricity only.</p>' : ''}<button type="button" class="text-button" data-action="add-meter">+ Add AC meter</button></article>`).join('');
+  $('household-status').textContent = householdSummary(household || serializeHousehold(state));
   renderHistory();
 }
 function showReport(r) {
@@ -131,6 +203,15 @@ function archiveBill(result) {
   if (history.length > 36) history = history.slice(0, 36);
   saveHistory();
   renderHistory();
+}
+function startNewMonth() {
+  saveHousehold();
+  state = stateFromHousehold(household || serializeHousehold(state));
+  saveDraft();
+  render();
+  $('errors').hidden = true;
+  $('report').hidden = true;
+  $('save-status').textContent = `New month started · families kept · ${stamp()}`;
 }
 $('bill-form').addEventListener('input', e => {
   const el = e.target;
@@ -195,15 +276,22 @@ $('add-family').onclick = () => {
   render();
   $('families').lastElementChild.querySelector('input').focus();
 };
+$('new-month').onclick = () => {
+  if (!confirm('Start a new month? Bill charges and dates are cleared. Families stay, and last meter readings become the new “previous”.')) return;
+  startNewMonth();
+};
 $('reset').onclick = () => {
-  if (!confirm('Clear the current bill draft saved on this phone? Saved history is kept.')) return;
-  state = blank();
-  saveDraft();
-  try { localStorage.removeItem(draftKey); } catch (_) {}
+  if (!confirm('Clear this month’s bill draft? Family names, people counts, and meter names stay saved on this phone.')) return;
+  startNewMonth();
+};
+$('clear-household').onclick = () => {
+  if (!confirm('Delete the saved household (all family names, people counts, and meter names) on this phone?')) return;
+  household = null;
+  try { localStorage.removeItem(householdKey); } catch (_) {}
+  state = { ...blankBill(), families: Array.from({ length: 3 }, freshFamily), villa: state.villa, gasRule: state.gasRule, start: state.start, end: state.end, mainUsage: state.mainUsage, electricity: state.electricity, water: state.water, gas: state.gas, tanker: state.tanker };
+  try { writeJSON(draftKey, state); } catch (_) {}
   render();
-  $('errors').hidden = true;
-  $('report').hidden = true;
-  $('save-status').textContent = 'Current draft cleared';
+  $('save-status').textContent = 'Saved household deleted';
 };
 $('clear-history').onclick = () => {
   if (!confirm('Delete all saved bill history on this phone? This cannot be undone.')) return;
@@ -214,12 +302,14 @@ $('clear-history').onclick = () => {
   $('save-status').textContent = 'All old bills deleted';
 };
 $('clear-all-data').onclick = () => {
-  if (!confirm('Delete the current draft and all saved bill history on this phone?')) return;
+  if (!confirm('Delete the household, current draft, and all saved bill history on this phone?')) return;
   state = blank();
   history = [];
+  household = null;
   try {
     localStorage.removeItem(draftKey);
     localStorage.removeItem(historyKey);
+    localStorage.removeItem(householdKey);
   } catch (_) {}
   render();
   $('errors').hidden = true;
@@ -260,12 +350,12 @@ $('bill-form').onsubmit = e => {
   }
   archiveBill(r);
   saveDraft();
-  if (storageOk) $('save-status').textContent = `Bill saved on this phone · ${stamp()}`;
+  if (storageOk) $('save-status').textContent = `Bill & household saved on this phone · ${stamp()}`;
   showReport(r);
 };
 if (storageOk) {
-  $('save-status').textContent = (hasDraftData(state) || history.length)
+  $('save-status').textContent = (hasDraftData(state) || history.length || household)
     ? `Restored from this phone · ${stamp()}`
-    : 'Ready · saves on this phone as you type';
+    : 'Ready · families stay saved on this phone';
 }
 render();

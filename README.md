@@ -1,6 +1,6 @@
-# Roommates Shakeer
+# Villa/Room Mates
 
-A mobile-friendly villa utility calculator. Plain HTML, CSS and JavaScript; no build, dependencies, accounts, analytics or backend.
+**FindHub IT Solutions** — a mobile-friendly villa utility calculator. Plain HTML, CSS and JavaScript; no build, dependencies, accounts, analytics or backend.
 
 Open `index.html` in a browser, or run `python3 -m http.server 8080` in this folder and visit http://localhost:8080.
 
@@ -16,9 +16,10 @@ Open `index.html` in a browser, or run `python3 -m http.server 8080` in this fol
 ## Local storage (phone-friendly)
 
 - The current draft saves on every edit in **localStorage**, so closing the browser on a phone and returning later restores your work.
+- **Household profile** (villa name, gas split rule, family names, people counts, meter names, and last readings) is saved separately and restored for whoever uses this browser.
+- **Start new month** / **Clear draft** clears dates and charges, keeps families, and rolls last meter readings into “previous”.
 - Each successful calculation is archived in a history list (up to 36 bills) on the same device.
-- **Clear draft** removes only the current form.
-- **Delete** removes one saved bill; **Delete all history** / **Delete all local data** wipe stored bills.
+- **Forget families** removes only the household roster. **Delete** removes one saved bill; **Delete all history** / **Delete all local data** wipe stored bills (and household when clearing all).
 - Nothing is uploaded to a server. Storage is per browser / device. If storage is unavailable or full, a status message appears.
 
 Calculate, then select **Save as PDF / Print**, and choose your browser's **Save as PDF** destination. The report includes bill dates, charges, population, meter readings, formula explanation and each family's contribution. Mobile print/PDF options depend on the browser; use its share/print menu if needed.
