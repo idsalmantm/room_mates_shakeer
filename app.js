@@ -226,7 +226,54 @@ function render() {
 }
 function showReport(r) {
   const readingCount = state.families.reduce((n, f) => n + f.meters.filter(m => String(m.current).trim() !== '').length, 0);
-  $('report').innerHTML = `<div class="section-title"><div><span class="step">03</span><h2>Your shared bill</h2></div><button type="button" id="print" class="secondary">PDF / Print</button></div><h3>${esc(state.villa || 'Shared villa')}</h3><p class="muted">${esc(state.start)} to ${esc(state.end)} · ${r.rows.length} families · ${r.people} people</p><div class="total-banner"><div><span>Total to share</span><strong><small>AED</small> ${money(r.total)}</strong></div><span>Every fils accounted for ✓</span></div><div class="next-month-box no-print"><strong>Ready for next month?</strong><p>This bill is saved. Start the next bill and each meter’s <b>current</b> reading becomes the new <b>previous</b> automatically${readingCount ? ` (${readingCount} meter${readingCount === 1 ? '' : 's'})` : ''}.</p><button type="button" id="next-month" class="primary">Start next month <span>→</span></button></div><div class="table-scroll"><table><caption>Family contributions · AED</caption><thead><tr><th>Family</th><th>People</th><th>AC kWh</th><th>Electricity</th><th>Water</th><th>Gas</th><th>Tanker</th><th>Total AED</th></tr></thead><tbody>${r.rows.map(row => `<tr><th>${esc(row.name)}</th><td>${row.people}</td><td>${qty(row.usage)}</td>${['electricity', 'water', 'gas', 'tanker', 'total'].map(k => `<td>${money(row[k])}</td>`).join('')}</tr>`).join('')}</tbody><tfoot><tr><th>Total</th><td>${r.people}</td><td>${qty(r.ac)}</td>${['electricity', 'water', 'gas', 'tanker'].map(k => `<td>${money(Math.round(+state[k] * 100))}</td>`).join('')}<td>${money(r.total)}</td></tr></tfoot></table></div><h3>How this bill was calculated</h3><div class="calculation-notes"><p>Main electricity: <b>${qty(+state.mainUsage)} kWh</b> for <b>AED ${money(Math.round(+state.electricity * 100))}</b>. Blended rate: <b>AED ${r.rate.toFixed(6)} / kWh</b>.</p><p>AC usage: ${qty(r.ac)} kWh. Common usage: ${qty(+state.mainUsage)} − ${qty(r.ac)} = <b>${qty(r.common)} kWh</b>, shared equally: <b>${qty(r.common / r.rows.length)} kWh per family</b>.</p><p>Each family’s electricity = (its AC usage + common usage ÷ ${r.rows.length}) × blended rate.</p><p>Water: AED ${(+state.water / r.people).toFixed(6)} per person. Tanker: AED ${(+state.tanker / r.people).toFixed(6)} per person${+state.tanker ? '' : ' (no charge this period)'}. Gas: split ${state.gasRule === 'people' ? 'by number of people' : 'equally per family'}.</p><p>Final amounts are rounded to fils, with remaining fils assigned by largest fractional remainder; ties follow family order. Displayed rates are rounded for readability.</p></div><h3>Meter readings</h3><div class="table-scroll"><table><caption>AC readings for ${esc(state.start)} to ${esc(state.end)} · kWh</caption><thead><tr><th>Family</th><th>Meter</th><th>Previous</th><th>Current</th><th>Used</th></tr></thead><tbody>${state.families.map(f => f.meters.length ? f.meters.map((m, j) => `<tr><th>${esc(f.name)}</th><td>${esc(m.name || `AC ${j + 1}`)}</td><td>${qty(+m.previous)}</td><td>${qty(+m.current)}</td><td>${qty(+m.current - +m.previous)}</td></tr>`).join('') : `<tr><th>${esc(f.name)}</th><td colspan="4">No AC meters</td></tr>`).join('')}</tbody></table></div><p class="hint print-help">Choose “Save as PDF” in the print window to download and share this report. On mobile, use your browser’s print or share options.</p>`;
+  const gasLabel = state.gasRule === 'people' ? 'by people' : 'equal per family';
+  $('report').innerHTML = `
+    <div class="section-title">
+      <div><span class="step">03</span><h2>Your shared bill</h2></div>
+      <button type="button" id="print" class="secondary">PDF / Print</button>
+    </div>
+    <div class="report-head">
+      <div>
+        <h3>${esc(state.villa || 'Shared villa')}</h3>
+        <p class="muted">${esc(state.start)} to ${esc(state.end)} · ${r.rows.length} families · ${r.people} people</p>
+      </div>
+      <div class="total-banner">
+        <div><span>Total to share</span><strong><small>AED</small> ${money(r.total)}</strong></div>
+        <span>Every fils accounted for ✓</span>
+      </div>
+    </div>
+    <div class="next-month-box no-print">
+      <strong>Ready for next month?</strong>
+      <p>This bill is saved. Start the next bill and each meter’s <b>current</b> reading becomes the new <b>previous</b> automatically${readingCount ? ` (${readingCount} meter${readingCount === 1 ? '' : 's'})` : ''}.</p>
+      <button type="button" id="next-month" class="primary">Start next month <span>→</span></button>
+    </div>
+    <div class="report-body">
+      <div class="report-block">
+        <div class="table-scroll">
+          <table>
+            <caption>Family contributions · AED</caption>
+            <thead><tr><th>Family</th><th>People</th><th>AC kWh</th><th>Electricity</th><th>Water</th><th>Gas</th><th>Tanker</th><th>Total AED</th></tr></thead>
+            <tbody>${r.rows.map(row => `<tr><th>${esc(row.name)}</th><td>${row.people}</td><td>${qty(row.usage)}</td>${['electricity', 'water', 'gas', 'tanker', 'total'].map(k => `<td>${money(row[k])}</td>`).join('')}</tr>`).join('')}</tbody>
+            <tfoot><tr><th>Total</th><td>${r.people}</td><td>${qty(r.ac)}</td>${['electricity', 'water', 'gas', 'tanker'].map(k => `<td>${money(Math.round(+state[k] * 100))}</td>`).join('')}<td>${money(r.total)}</td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+      <div class="report-block">
+        <div class="table-scroll">
+          <table>
+            <caption>AC readings · kWh</caption>
+            <thead><tr><th>Family</th><th>Meter</th><th>Previous</th><th>Current</th><th>Used</th></tr></thead>
+            <tbody>${state.families.map(f => f.meters.length ? f.meters.map((m, j) => `<tr><th>${esc(f.name)}</th><td>${esc(m.name || `AC ${j + 1}`)}</td><td>${qty(+m.previous)}</td><td>${qty(+m.current)}</td><td>${qty(+m.current - +m.previous)}</td></tr>`).join('') : `<tr><th>${esc(f.name)}</th><td colspan="4">No AC meters</td></tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="calculation-notes">
+      <p><b>Rate</b> AED ${r.rate.toFixed(4)}/kWh · Main ${qty(+state.mainUsage)} kWh / AED ${money(Math.round(+state.electricity * 100))} · AC ${qty(r.ac)} · Common ${qty(r.common)} (${qty(r.common / r.rows.length)}/family)</p>
+      <p class="screen-only">Each family’s electricity = (AC usage + common ÷ ${r.rows.length}) × rate. Water AED ${(+state.water / r.people).toFixed(4)}/person · Tanker AED ${(+state.tanker / r.people).toFixed(4)}/person · Gas ${gasLabel}. Rounded to fils by largest remainder.</p>
+      <p class="print-only"><b>Split</b> Water/tanker by people · Gas ${gasLabel} · Fils by largest remainder</p>
+    </div>
+    <p class="hint print-help">Choose “Save as PDF” in the print window to download and share this report. On mobile, use your browser’s print or share options.</p>`;
   $('report').hidden = false;
   $('print').onclick = () => window.print();
   $('next-month').onclick = () => {
@@ -236,6 +283,7 @@ function showReport(r) {
   };
   $('report').scrollIntoView({ behavior: 'smooth' });
 }
+
 function archiveBill(result) {
   if (!storageOk) return;
   const fingerprint = `${state.villa}|${state.start}|${state.end}|${JSON.stringify(state.families)}|${state.electricity}|${state.water}|${state.gas}|${state.tanker}|${state.mainUsage}|${state.gasRule}`;

@@ -145,7 +145,12 @@ thead{color:#748477;font-size:9px;text-transform:uppercase;letter-spacing:.4px}
 tbody th{font-weight:600}
 tfoot,tbody td:last-child{font-weight:750;background:#f1f5ed}
 .table-scroll{overflow:auto;margin:12px 0 16px;-webkit-overflow-scrolling:touch}
+.report-head{display:flex;flex-direction:column;gap:8px}
+.report-body{display:flex;flex-direction:column;gap:8px}
+.print-only{display:none}
 .calculation-notes{font-size:11px;color:#6b7a71;background:#f7f9f4;padding:10px 12px;border-radius:8px}
+.calculation-notes p{margin:0 0 6px}
+.calculation-notes p:last-child{margin:0}
 footer{font-size:10px;text-align:center;color:#8a948c;padding:24px 0 8px;line-height:1.5}
 .report{scroll-margin-top:12px}
 .history-card{margin-top:4px}
@@ -214,22 +219,45 @@ footer{font-size:10px;text-align:center;color:#8a948c;padding:24px 0 8px;line-he
 }
 
 @media print{
-  @page{size:A4 landscape;margin:12mm}
-  body{background:#fff;color:#152e26}
-  main{max-width:none;padding:0}
-  header,.intro,.session,.household-banner,form,footer,#print,.print-help,.history-card,.no-print{display:none!important}
-  .report{border:0;box-shadow:none;padding:0;margin:0}
-  .report .section-title{margin-bottom:8px}
-  .total-banner{background:#eef4ee;color:#152e26;padding:12px;border:1px solid #ccd8cc}
-  .total-banner span{color:#385149}
-  .total-banner strong{font-size:26px}
-  .table-scroll{overflow:visible}
-  table{font-size:11px;white-space:normal}
+  @page{size:A4 landscape;margin:7mm}
+  html,body{background:#fff;color:#152e26;height:auto}
+  main{max-width:none;padding:0;margin:0}
+  header,.intro,.session,.household-banner,form,footer,#print,.print-help,.history-card,.no-print,.screen-only,.step{display:none!important}
+  .print-only{display:block!important}
+  .report{
+    border:0;box-shadow:none;padding:0;margin:0;border-radius:0;
+    break-inside:avoid;page-break-inside:avoid;
+  }
+  .report .section-title{margin:0 0 4px;gap:6px}
+  .report h2{font-size:14px}
+  .report h3{font-size:12px;margin:0 0 2px}
+  .report .muted{margin:0;font-size:10px}
+  .report-head{
+    display:flex;flex-direction:row;align-items:center;justify-content:space-between;
+    gap:12px;margin:0 0 6px;
+  }
+  .total-banner{
+    background:#eef4ee;color:#152e26;padding:6px 10px;margin:0;border:1px solid #ccd8cc;
+    flex-direction:row;align-items:center;gap:10px;min-width:220px;
+  }
+  .total-banner span{color:#385149;font-size:9px}
+  .total-banner strong{font-size:18px;letter-spacing:-.4px}
+  .total-banner small{font-size:11px}
+  .report-body{
+    display:grid;grid-template-columns:1.35fr 1fr;gap:10px;align-items:start;margin:0 0 6px;
+  }
+  .table-scroll{overflow:visible;margin:0}
+  table{font-size:9px;white-space:nowrap;width:100%}
+  caption{font-size:9px;margin:0 0 4px;font-weight:700;color:#385149}
   thead{display:table-header-group}
   tr{break-inside:avoid}
-  th,td{padding:8px}
-  h3{break-after:avoid}
-  .calculation-notes{background:#fff;padding:0}
+  th,td{padding:3px 5px}
+  th:first-child,td:first-child{min-width:0}
+  .calculation-notes{
+    background:#f7f9f4;padding:6px 8px;border-radius:6px;font-size:9px;line-height:1.35;
+    display:flex;flex-wrap:wrap;gap:4px 14px;
+  }
+  .calculation-notes p{margin:0}
   button{display:none}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
