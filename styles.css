@@ -117,6 +117,12 @@ button:focus-visible{outline:3px solid #80bda9;outline-offset:2px}
 .total-banner strong{display:block;font-size:28px;letter-spacing:-.8px}
 .total-banner span{font-size:11px;color:#d6e8df}
 .total-banner small{font-size:13px;font-weight:400}
+.next-month-box{
+  background:#edf3ec;border:1px solid #d5e3d4;border-radius:10px;padding:12px 14px;margin:0 0 14px;
+}
+.next-month-box strong{display:block;font-size:13px;color:#1f5c52;margin-bottom:4px}
+.next-month-box p{margin:0 0 10px;font-size:12px;color:#5f736a}
+.next-month-box .primary{width:100%;justify-content:center}
 table{width:100%;border-collapse:collapse;font-size:11px;text-align:right;white-space:nowrap}
 caption{text-align:left;font-size:10px;color:#718176;margin:0 0 8px}
 th,td{padding:8px 6px;border-bottom:1px solid #e7ece4}
@@ -197,7 +203,7 @@ footer{font-size:10px;text-align:center;color:#8a948c;padding:24px 0 8px;line-he
   @page{size:A4 landscape;margin:12mm}
   body{background:#fff;color:#152e26}
   main{max-width:none;padding:0}
-  header,.intro,.session,.household-banner,form,footer,#print,.print-help,.history-card{display:none!important}
+  header,.intro,.session,.household-banner,form,footer,#print,.print-help,.history-card,.no-print{display:none!important}
   .report{border:0;box-shadow:none;padding:0;margin:0}
   .report .section-title{margin-bottom:8px}
   .total-banner{background:#eef4ee;color:#152e26;padding:12px;border:1px solid #ccd8cc}
